@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  db:
+    tty: true
+    platform: linux/x86_64
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'db_name'
+      MYSQL_USER: 'db_user'
+      MYSQL_PASSWORD: 'db_password'
+      MYSQL_ROOT_PASSWORD: 'root'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - dbdata:/var/lib/mysql/
+
+volumes:
+  dbdata:
+    driver: local
