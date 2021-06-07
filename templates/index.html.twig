@@ -1,0 +1,578 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container-fluid my-3">
+        <nav>
+            <div class="nav nav-tabs" id="navTab" role="tablist">
+                <a href="#navAddress" class="nav-link active" id="navAddressTab" data-toggle="tab"
+                   role="tab">Addresses</a>
+                <a href="#navPool" class="nav-link" id="navPoolTab" data-toggle="tab" role="tab">Pools</a>
+                <a href="#navImport" class="nav-link" id="navImportTab" data-toggle="tab" role="tab">Import</a>
+                <a href="#navTemplates" class="nav-link" id="navTemplatesTab" data-toggle="tab" role="tab">Templates</a>
+                <a href="#navMailings" class="nav-link" id="navMailingsTab" data-toggle="tab" role="tab">Mailings</a>
+                <a href="#navActions" class="nav-link" id="navActionsTab" data-toggle="tab" role="tab">Actions</a>
+                <a href="#navBlacklist" class="nav-link" id="navBlacklistTab" data-toggle="tab" role="tab">Blacklist</a>
+            </div>
+        </nav>
+
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="navAddress" role="tabpanel">
+                <div class="row">
+                    <div class="col-12 my-3">
+                        <select name="pools" id="poolSelect" style="width: 100%;"></select>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <select name="duplicates" id="duplicatesSelect" style="width: 100%;" multiple>
+                            <option value="company">Company</option>
+                            <option value="street">Street</option>
+                            <option value="zip">Zip</option>
+                            <option value="city">City</option>
+                            <option value="country">Country</option>
+                            <option value="gender"></option>
+                            <option value="fname">First Name</option>
+                            <option value="lname">Last Name</option>
+                            <option value="phone">Phone</option>
+                        </select>
+                    </div>
+                    <div class="col-12 mb-3" id="searchBar">
+                        <div class="form-row">
+                            <div class="col">
+                                <input type="text" class="form-control search-col" placeholder="Company">
+                            </div>
+                            <div class="col">
+                                <input type="text" class="form-control search-col" placeholder="Street">
+                            </div>
+                            <div class="col">
+                                <input type="text" class="form-control search-col" placeholder="Zip">
+                            </div>
+                            <div class="col">
+                                <input type="text" class="form-control search-col" placeholder="City">
+                            </div>
+                            <div class="col">
+                                <input type="text" class="form-control search-col" placeholder="Country">
+                            </div>
+                            <div class="col">
+                                <select id="genderSelectSearch" data-placeholder="Gender">
+                                    <option value=""></option>
+                                    <option value="m">Male</option>
+                                    <option value="f">Female</option>
+                                    <option value="^$">Empty</option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <input type="text" class="form-control search-col" placeholder="First Name">
+                            </div>
+                            <div class="col">
+                                <input type="text" class="form-control search-col" placeholder="Last Name">
+                            </div>
+                            <div class="col">
+                                <input type="text" class="form-control search-col" placeholder="Phone">
+                            </div>
+                            <div class="col">
+                                <select id="statusSelectSearch" data-placeholder="Status">
+                                    <option value=""></option>
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <select id="reactionSelectSearch" data-placeholder="Reaction"></select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <table id="addressList" class=" table table-bordered table-hover w-100">
+                    <thead>
+                    <tr>
+                        <td>Company</td>
+                        <td>Street</td>
+                        <td>Zip</td>
+                        <td>City</td>
+                        <td>Country</td>
+                        <td>Gender</td>
+                        <td>First Name</td>
+                        <td>Last Name</td>
+                        <td>Phone</td>
+                        <td>Status</td>
+                        <td>Reaction</td>
+                        <td>ReactionID</td>
+                        <td>Action</td>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+
+            <div class="tab-pane fade" id="navPool" role="tabpanel">
+                <form class="form-row mt-3" id="createPoolForm">
+                    <div class="form-group m-0 col col-lg-5" data-toggle="tooltip" data-placement="bottom"
+                         data-trigger="manual"
+                         data-container="#createPoolForm" title="Edit">
+                        <input type="text" class="form-control" name="name" placeholder="Name" required>
+                    </div>
+                    <div class="col-auto">
+                        <input type="color" id="color" name="color" value="#ffffff" class="h-100">
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                    <input type="text" name="id" class="d-none">
+                </form>
+
+                <table id="poolList" class="table table-bordered table-hover w-100">
+                    <thead>
+                    <tr>
+                        <td>Name</td>
+                        <td>Addresses</td>
+                        <td>Mailings</td>
+                        <td>Last mailing</td>
+                        <td>Action</td>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+
+            <div class="tab-pane fade" id="navImport" tab="tabpanel">
+                <div class="mt-3 text-danger">The file needs to have a table-head in the first row</div>
+                <input type="file" name="file">
+                <form class="mt-3" id="selectColForm">
+                    <div class="form-group">
+                        <select name="import_pool_id" id="poolSelectImport" style="width: 100%;" required></select>
+                    </div>
+                    <div class="form-group" id="poolLimitWrap">
+                        <label for="pool_limit">Number of addresses in pool</label>
+                        <input name="pool_limit" id="pool_limit" type="number" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="company_col">Company</label>
+                        <select name="company_col" id="company_col" style="width: 100%;" class="select-col">
+                            <option value="" selected disabled></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="street_col">Street</label>
+                        <select name="street_col" id="street_col" style="width: 100%;" class="select-col">
+                            <option value="" selected disabled></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="zip_col">Zip</label>
+                        <select name="zip_col" id="zip_col" style="width: 100%;" class="select-col">
+                            <option value="" selected disabled></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="city_col">City</label>
+                        <select name="city_col" id="city_col" style="width: 100%;" class="select-col">
+                            <option value="" selected disabled></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="country_col">Country</label>
+                        <select name="country_col" id="country_col" style="width: 100%;" class="select-col">
+                            <option value="" selected disabled></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="first_name_col">First Name</label>
+                        <select name="first_name_col" id="first_name_col" style="width: 100%;" class="select-col">
+                            <option value="" selected disabled></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name_col">Last Name</label>
+                        <select name="last_name_col" id="last_name_col" style="width: 100%;" class="select-col">
+                            <option value="" selected disabled></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="title_col">Title</label>
+                        <select name="title_col" id="title_col" style="width: 100%;" class="select-col">
+                            <option value="" selected disabled></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="position_col">Position</label>
+                        <select name="position_col" id="position_col" style="width: 100%;" class="select-col">
+                            <option value="" selected disabled></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone_col">Phone</label>
+                        <select name="phone_col" id="phone_col" style="width: 100%;" class="select-col">
+                            <option value="" selected disabled></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="email_col">Email</label>
+                        <select name="email_col" id="email_col" style="width: 100%;" class="select-col">
+                            <option value="" selected disabled></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="gender_col">Gender</label>
+                        <select name="gender_col" id="gender_col" style="width: 100%;" class="select-col">
+                            <option value="" selected disabled></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="status_col">Status</label>
+                        <select name="status_col" id="status_col" style="width: 100%;" class="select-col">
+                            <option value="" selected disabled></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="file_url_col">File URL</label>
+                        <select name="file_url_col" id="file_url_col" style="width: 100%;" class="select-col">
+                            <option value="" selected disabled></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="var_1_col">Variable 1</label>
+                        <select name="var_1_col" id="var_1_col" style="width: 100%;" class="select-col">
+                            <option value="" selected disabled></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="var_2_col">Variable 2</label>
+                        <select name="var_2_col" id="var_2_col" style="width: 100%;" class="select-col">
+                            <option value="" selected disabled></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="var_3_col">Variable 3</label>
+                        <select name="var_3_col" id="var_3_col" style="width: 100%;" class="select-col">
+                            <option value="" selected disabled></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="var_4_col">Variable 4</label>
+                        <select name="var_4_col" id="var_4_col" style="width: 100%;" class="select-col">
+                            <option value="" selected disabled></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="var_5_col">Variable 5</label>
+                        <select name="var_5_col" id="var_5_col" style="width: 100%;" class="select-col">
+                            <option value="" selected disabled></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-row">
+                            <div class="col-auto">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" name="gender_auto" class="custom-control-input"
+                                           id="genderSwitch">
+                                    <label class="custom-control-label" for="genderSwitch">Gender auto</label>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div id="genderApiStats" class="text-info"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="file_name">
+                    <button type="submit" class="btn btn-primary">Import</button>
+                </form>
+            </div>
+
+            <div class="tab-pane fade" id="navTemplates" tab="tabpanel">
+                <div class="row mt-3">
+                    <div class="col">
+                        <table id="templateList" class=" table table-bordered table-hover w-100">
+                            <thead>
+                            <tr>
+                                <td>Name</td>
+                                <td>Section</td>
+                                <td>Action</td>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="navMailings" tab="tabpanel">
+                <form id="mailingForm" class="mt-3 mb-0">
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <select name="pool" id="poolSelectMailing" required style="width: 100%;"></select>
+                        </div>
+                        <div class="form-group col">
+                            <select name="template" class="template-select-mailing" required
+                                    style="width: 100%;"></select>
+                        </div>
+                        <div class="form-group col">
+                            <input type="text" name="date" class="form-control" placeholder="Date" required>
+                        </div>
+                        <div class="col">
+                            <button type="submit" class="btn btn-primary">Create</button>
+                        </div>
+                    </div>
+                </form>
+
+                <table id="mailingList" class=" table table-bordered table-hover w-100">
+                    <thead>
+                    <tr>
+                        <td>ID</td>
+                        <td>Pool</td>
+                        <td>Template</td>
+                        <td>Section</td>
+                        <td>Date</td>
+                        <td>File</td>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+
+            <div class="tab-pane fade" id="navActions" tab="tabpanel">
+                <div class="mt-3">
+                    <form class="form-row mt-3" id="createActionForm">
+                        <div class="form-group m-0 col col-lg-5" data-toggle="tooltip" data-placement="bottom"
+                             data-trigger="manual"
+                             data-container="#createActionForm" title="Edit">
+                            <input type="text" class="form-control" name="text" placeholder="Name" required>
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </form>
+
+                    <table id="actionList" class="table table-bordered table-hover w-100">
+                        <thead>
+                        <tr>
+                            <td>ID</td>
+                            <td>Name</td>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="navBlacklist" tab="tabpanel">
+                <div class="mt-3">
+                    <table id="blackList" class="table table-bordered table-hover w-100">
+                        <thead>
+                        <tr>
+                            <td>Company</td>
+                            <td>Street</td>
+                            <td>Zip</td>
+                            <td>City</td>
+                            <td>Country</td>
+                            <td>Gender</td>
+                            <td>First Name</td>
+                            <td>Last Name</td>
+                            <td>Phone</td>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" tabindex="-1" id="createAddressFormModal">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Address</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form id="createAddressForm" class="m-0">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="company">Company</label>
+                                <input type="text" name="company" class="form-control" id="company">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col">
+                                    <label for="street">Street</label>
+                                    <input type="text" name="street" class="form-control" id="street">
+                                </div>
+                                <div class="form-group col">
+                                    <label for="zip">Zip</label>
+                                    <input type="text" name="zip" class="form-control" id="zip">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col">
+                                    <label for="city">City</label>
+                                    <input type="text" name="city" class="form-control" id="city">
+                                </div>
+                                <div class="form-group col">
+                                    <label for="country">Country</label>
+                                    <input type="text" name="country" class="form-control" id="country">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col">
+                                    <label for="first_name">First Name</label>
+                                    <input type="text" name="first_name" class="form-control" id="first_name">
+                                </div>
+                                <div class="form-group col">
+                                    <label for="last_name">Last Name</label>
+                                    <input type="text" name="last_name" class="form-control" id="last_name">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col">
+                                    <label for="title">Title</label>
+                                    <input type="text" name="title" class="form-control" id="title">
+                                </div>
+                                <div class="form-group col">
+                                    <label for="position">Position</label>
+                                    <input type="text" name="position" class="form-control" id="position">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col">
+                                    <label for="phone">Phone</label>
+                                    <input type="text" name="phone" class="form-control" id="phone">
+                                </div>
+                                <div class="form-group col">
+                                    <label for="email">Email</label>
+                                    <input type="email" name="email" class="form-control" id="email">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col">
+                                    <label>Gender</label><br>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input type="radio" id="radioGenderMale" name="gender" value="m"
+                                               class="custom-control-input">
+                                        <label class="custom-control-label" for="radioGenderMale">Male</label>
+                                    </div>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input type="radio" id="radioGenderFemale" name="gender" value="f"
+                                               class="custom-control-input">
+                                        <label class="custom-control-label" for="radioGenderFemale">Female</label>
+                                    </div>
+                                </div>
+                                <div class="form-group col align-self-end">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" name="status" class="custom-control-input"
+                                               id="statusSwitch" checked>
+                                        <label class="custom-control-label" for="statusSwitch">Status</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <select name="pool_id" id="poolSelectForm" style="width: 100%;"></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="reactionSelect">Reaction</label>
+                                <select name="reaction" id="reactionSelect" style="width: 100%;"></select>
+                            </div>
+                            <div class="form-group">
+                                <textarea class="form-control" name="comment" id="comment" rows="3"
+                                          placeholder="Comment"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="file_url">File URL</label>
+                                <input type="text" name="file_url" class="form-control" id="file_url">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col">
+                                    <label for="var_1">Variable 1</label>
+                                    <input type="text" name="var_1" class="form-control" id="var_1">
+                                </div>
+                                <div class="form-group col">
+                                    <label for="var_2">Variable 2</label>
+                                    <input type="text" name="var_2" class="form-control" id="var_2">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col">
+                                    <label for="var_3">Variable 3</label>
+                                    <input type="text" name="var_3" class="form-control" id="var_3">
+                                </div>
+                                <div class="form-group col">
+                                    <label for="var_4">Variable 4</label>
+                                    <input type="text" name="var_4" class="form-control" id="var_4">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col">
+                                    <label for="var_5">Variable 5</label>
+                                    <input type="text" name="var_5" class="form-control" id="var_5">
+                                </div>
+                            </div>
+                            <p class="mb-2">Mailing</p>
+                            <div class="form-row">
+                                <div class="form-group col">
+                                    <select name="address_mailing_template" class="template-select-mailing"
+                                            style="width: 100%;"></select>
+                                </div>
+                                <div class="form-group col">
+                                    <input type="text" name="address_mailing_date" class="form-control"
+                                           placeholder="Date">
+                                </div>
+                                <div class="col">
+                                    <button id="addressCreateMailing" class="btn btn-primary">Create</button>
+                                </div>
+                            </div>
+                            <div>
+                                <span>Mailings</span>
+                                <table id="addressMailingList" class="table table-bordered table-hover w-100">
+                                    <thead>
+                                    <tr>
+                                        <td>Template</td>
+                                        <td>Section</td>
+                                        <td>Date</td>
+                                        <td>File</td>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="modal-footer d-flex justify-content-between">
+                            <button id="blacklistBtn" class="btn btn-danger">Add to blacklist</button>
+                            <button id="deleteAddress" class="btn btn-danger"><i class="fa fa-trash"></i></button>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                        <input type="text" name="id" id="address_id" class="d-none">
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" tabindex="-1" id="createTemplateFormModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Template</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form method="post" id="createTemplateForm" class="m-0">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="template_name">Name</label>
+                                <input class="form-control" type="text" name="name" id="template_name">
+                            </div>
+                            <div class="from-group">
+                                <label for="template_section">Section</label>
+                                <input class="form-control" type="text" name="section" id="template_section">
+                            </div>
+                            <div class="mt-3">
+                                <label for="template_html">Content</label>
+                                <textarea name="file" id="template_html"></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary preview-template-btn">Preview</button>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                        <input type="text" name="id" id="template_id" class="d-none">
+                    </form>
+                    <form id="previewTemplateForm" class="d-none" action="/template/preview" method="post"
+                          target="_blank">
+                        <input type="text" name="file">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
