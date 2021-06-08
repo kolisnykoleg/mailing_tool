@@ -9,19 +9,19 @@ let addressList = $('#addressList').DataTable({
     },
   },
   columns: [
-    { data: 'company', name: 'company' },
-    { data: 'street', name: 'street' },
-    { data: 'zip', name: 'zip' },
-    { data: 'city', name: 'city' },
-    { data: 'country', name: 'country' },
-    { data: 'gender', name: 'gender' },
-    { data: 'first_name', name: 'first_name' },
-    { data: 'last_name', name: 'last_name' },
-    { data: 'phone', name: 'phone' },
+    { data: 'company' },
+    { data: 'street' },
+    { data: 'zip' },
+    { data: 'city' },
+    { data: 'country' },
+    { data: 'gender' },
+    { data: 'firstName' },
+    { data: 'lastName' },
+    { data: 'phone' },
     { data: 'status' },
-    { data: 'reaction_text' },
+    { data: 'reaction.name' },
     {
-      data: 'reaction',
+      data: 'reaction.id',
       visible: false,
     },
     {
@@ -52,13 +52,13 @@ let addressList = $('#addressList').DataTable({
   createdRow: function (row, data) {
     $(row).attr('id', 'row_' + data.id)
 
-    $(row).css('background', data.color || 'white')
+    $(row).css('background', data.pool.color || 'white')
 
     if (data.blacklist) {
       $(row).addClass('blacklist')
     }
 
-    if (+data.reaction > 1) {
+    if (+data.reaction.id > 1) {
       $(row).addClass('bg-green')
     }
   },
@@ -161,7 +161,9 @@ initPoolSelect()
 
 $('#createPoolForm').submit(function (event) {
   event.preventDefault()
-  $.post('/pool/create', $(this).serialize(), res => {
+  const poolId = $(this).find('input[name="id"]').val()
+  let requestUrl = poolId ? `/pool/update/${poolId}` : '/pool/create'
+  $.post(requestUrl, $(this).serialize(), res => {
     if (res.success) {
       $(this).trigger('reset')
       $('[data-toggle=tooltip]', this).tooltip('hide')
@@ -174,9 +176,11 @@ $('#createPoolForm').submit(function (event) {
 
 $('#createAddressForm').submit(function (event) {
   event.preventDefault()
-  $.post('/address/create', $(this).serialize(), res => {
+  const addressId = $(this).find('[name=id]').val()
+  const requestUrl = addressId ? `/address/update/${addressId}` : '/address/create'
+  $.post(requestUrl, $(this).serialize(), res => {
     if (res.success) {
-      if ($(this).find('[name=id]').val() === '') {
+      if (!addressId) {
         addressList.ajax.reload()
       }
       $('#createAddressFormModal').modal('hide')
@@ -207,25 +211,25 @@ $(document).on('click', '.edit-address-btn', function () {
     $('#zip').val(res.zip)
     $('#city').val(res.city)
     $('#country').val(res.country)
-    $('#first_name').val(res.first_name)
-    $('#last_name').val(res.last_name)
+    $('#first_name').val(res.firstName)
+    $('#last_name').val(res.lastName)
     $('#title').val(res.title)
     $('#position').val(res.position)
     $('#phone').val(res.phone)
     $('#email').val(res.email)
     $('#comment').val(res.comment)
-    $('#file_url').val(res.file_url)
-    $('#var_1').val(res.var_1)
-    $('#var_2').val(res.var_2)
-    $('#var_3').val(res.var_3)
-    $('#var_4').val(res.var_4)
-    $('#var_5').val(res.var_5)
+    $('#file_url').val(res.fileUrl)
+    $('#var_1').val(res.var1)
+    $('#var_2').val(res.var2)
+    $('#var_3').val(res.var3)
+    $('#var_4').val(res.var4)
+    $('#var_5').val(res.var5)
     res.gender && $(`input[name=gender][value=${res.gender}]`).click()
-    $('input[name=status]').attr('checked', res.status == '1')
-    $('#poolSelectForm').val(res.pool_id).trigger('change')
-    $('#reactionSelect').val(res.reaction).trigger('change')
+    $('input[name=status]').attr('checked', res.status == 'on')
+    $('#poolSelectForm').val(res.pool.id).trigger('change')
+    $('#reactionSelect').val(res.reaction.id).trigger('change')
     $('#address_id').val(res.id)
-    addressPoolId = res.pool_id
+    addressPoolId = res.pool.id
     addressMailingList.ajax.reload()
     $('#blacklistBtn').data('id', res.id)
     $('#createAddressFormModal').modal('show')
@@ -517,12 +521,8 @@ $(document).on('click', '#addressCreateMailing', function (event) {
 
 let blackList = $('#blackList').DataTable({
   ajax: {
-    url: '/address/roll',
+    url: '/address/blacklist',
     type: 'POST',
-    data: data => {
-      data.blacklist = false
-      return data
-    },
   },
   columns: [
     { data: 'company' },
@@ -531,8 +531,8 @@ let blackList = $('#blackList').DataTable({
     { data: 'city' },
     { data: 'country' },
     { data: 'gender' },
-    { data: 'first_name' },
-    { data: 'last_name' },
+    { data: 'firstName' },
+    { data: 'lastName' },
     { data: 'phone' },
   ],
   paging: true,
@@ -547,7 +547,7 @@ let actionList = $('#actionList').DataTable({
   },
   columns: [
     { data: 'id' },
-    { data: 'text' },
+    { data: 'name' },
   ],
   paging: false,
   info: false,
@@ -715,9 +715,8 @@ function updateAddressRow (addressId) {
   $.get('/address/get/' + addressId, res => {
     const selector = '#row_' + addressId
     addressList.row(selector).data(res)
-    console.log(res)
-    $(selector).css('background', res.color || 'white')
-    if (+res.reaction > 1) {
+    $(selector).css('background', res.pool.color || 'white')
+    if (+res.reaction.id > 1) {
       $(selector).addClass('bg-green')
     } else {
       $(selector).removeClass('bg-green')
@@ -729,7 +728,12 @@ function initReactionSelect () {
   $.get('/reaction/roll', res => {
     $('#reactionSelect').empty()
     $('#reactionSelect').select2({
-      data: res.data,
+      data: res.data.map(item => {
+        return {
+          id: item.id,
+          text: item.name,
+        }
+      }),
       theme: 'bootstrap4',
     })
 
@@ -740,7 +744,12 @@ function initReactionSelect () {
           id: '',
           text: '',
         },
-        ...res.data
+        ...res.data.map(item => {
+          return {
+            id: item.id,
+            text: item.name,
+          }
+        })
       ],
       theme: 'bootstrap4',
     })

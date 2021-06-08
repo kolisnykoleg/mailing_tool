@@ -54,7 +54,7 @@ class Reaction
     /**
      * @return Collection|Address[]
      */
-    public function getAddresses(): Collection
+    public function _getAddresses(): Collection
     {
         return $this->addresses;
     }
