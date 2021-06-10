@@ -2,21 +2,21 @@
 
 namespace App\Repository;
 
-use App\Entity\NameGenger;
+use App\Entity\NameGender;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @method NameGenger|null find($id, $lockMode = null, $lockVersion = null)
- * @method NameGenger|null findOneBy(array $criteria, array $orderBy = null)
- * @method NameGenger[]    findAll()
- * @method NameGenger[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method NameGender|null find($id, $lockMode = null, $lockVersion = null)
+ * @method NameGender|null findOneBy(array $criteria, array $orderBy = null)
+ * @method NameGender[]    findAll()
+ * @method NameGender[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class NameGengerRepository extends ServiceEntityRepository
+class NameGenderRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, NameGenger::class);
+        parent::__construct($registry, NameGender::class);
     }
 
     // /**

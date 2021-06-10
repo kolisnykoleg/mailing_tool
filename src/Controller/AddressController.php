@@ -39,8 +39,7 @@ class AddressController extends AbstractController
         PoolRepository $poolRepository,
         ReactionRepository $reactionRepository,
         EntityManagerInterface $entityManager
-    )
-    {
+    ) {
         $this->addressRepository = $addressRepository;
         $this->poolRepository = $poolRepository;
         $this->reactionRepository = $reactionRepository;
@@ -79,9 +78,11 @@ class AddressController extends AbstractController
      */
     public function blacklist(): Response
     {
-        $blacklist = $this->addressRepository->findBy([
-            'blacklist' => true,
-        ]);
+        $blacklist = $this->addressRepository->findBy(
+            [
+                'blacklist' => true,
+            ]
+        );
         return $this->json(['data' => $blacklist]);
     }
 
@@ -143,7 +144,7 @@ class AddressController extends AbstractController
         $address->setPhone($request->get('phone'));
         $address->setEmail($request->get('email'));
         $address->setGender($request->get('gender'));
-        $address->setStatus($request->get('status'));
+        $address->setStatus((boolean)$request->get('status'));
         $address->setComment($request->get('comment'));
         $address->setFileUrl($request->get('file_url'));
         $address->setVar1($request->get('var_1'));

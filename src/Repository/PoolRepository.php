@@ -19,6 +19,21 @@ class PoolRepository extends ServiceEntityRepository
         parent::__construct($registry, Pool::class);
     }
 
+    public function getFreeIndex(string $name): int
+    {
+        $pool = $this->createQueryBuilder('p')
+            ->where('p.name LIKE :name')
+            ->setParameter('name', "$name%")
+            ->orderBy('p.id', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return $pool
+            ? array_slice(explode(substr($name, -1), $pool->getName()), -1)[0] + 1
+            : 1;
+    }
+
     // /**
     //  * @return Pool[] Returns an array of Pool objects
     //  */

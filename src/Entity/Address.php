@@ -63,9 +63,9 @@ class Address
     private $last_name;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="boolean", options={"default":true})
      */
-    private $status;
+    private $status = true;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
@@ -123,7 +123,7 @@ class Address
     private $var5;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", options={"default":false})
      */
     private $blacklist;
 
@@ -250,12 +250,12 @@ class Address
         return $this;
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): ?bool
     {
         return $this->status;
     }
 
-    public function setStatus(?string $status): self
+    public function setStatus(bool $status): self
     {
         $this->status = $status;
 

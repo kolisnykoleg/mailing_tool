@@ -225,7 +225,7 @@ $(document).on('click', '.edit-address-btn', function () {
     $('#var_4').val(res.var4)
     $('#var_5').val(res.var5)
     res.gender && $(`input[name=gender][value=${res.gender}]`).click()
-    $('input[name=status]').attr('checked', res.status == 'on')
+    $('input[name=status]').attr('checked', res.status)
     $('#poolSelectForm').val(res.pool.id).trigger('change')
     $('#reactionSelect').val(res.reaction.id).trigger('change')
     $('#address_id').val(res.id)
