@@ -12,6 +12,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+use function Doctrine\ORM\QueryBuilder;
+
+
+/**
+ * @Route("/address")
+ */
 class AddressController extends AbstractController
 {
     /**
@@ -47,34 +53,83 @@ class AddressController extends AbstractController
     }
 
     /**
-     * @Route("/address/create", name="createAddress")
+     * @Route("/create", name="createAddress")
      */
     public function create(Request $request): Response
     {
-        $response = [
-            'success' => true,
-            'text' => 'Address saved',
-        ];
-
         $address = new Address();
         $this->setData($request, $address);
         $this->entityManager->persist($address);
         $this->entityManager->flush();
 
-        return $this->json($response);
+        return $this->json(
+            [
+                'success' => true,
+                'text' => 'Address saved',
+            ]
+        );
     }
 
     /**
-     * @Route("/address/roll", name="listAddresses")
+     * @Route("/roll", name="listAddresses")
      */
-    public function list(): Response
+    public function list(Request $request): Response
     {
-        $addresses = $this->addressRepository->findAll();
+        $pools = $request->get('pools');
+        $duplicates = $request->get('duplicates');
+
+        $query = $this->addressRepository->createQueryBuilder('a');
+
+        if ($pools) {
+            $query
+                ->join('a.pool', 'p')
+                ->andWhere($query->expr()->in('p.id', $pools));
+        }
+
+        if ($duplicates) {
+            $cols = join(', ', $duplicates);
+            $wherePool = $pools ? 'WHERE pool_id IN (' . join(', ', $pools) . ')' : '';
+            $on = join(
+                ' AND ',
+                array_map(
+                    function ($column) {
+                        return "a.$column = b.$column";
+                    },
+                    $duplicates
+                )
+            );
+
+            $duplicateIds = $this->entityManager
+                ->getConnection()
+                ->executeQuery(
+                    "SELECT a.id, a.pool_id FROM address a
+                    JOIN (
+                        SELECT $cols, COUNT(id) AS duplicates
+                        FROM address b
+                        $wherePool
+                        GROUP BY $cols
+                        HAVING duplicates > 1) b
+                    ON $on
+                    $wherePool"
+                )
+                ->fetchFirstColumn();
+
+            if (!$duplicateIds) {
+                return $this->json(['data' => []]);
+            }
+
+            $query->andWhere($query->expr()->in('a.id', $duplicateIds));
+        }
+
+        $addresses = $query
+            ->getQuery()
+            ->getResult();
+
         return $this->json(['data' => $addresses]);
     }
 
     /**
-     * @Route("/address/blacklist", name="blacklistAddresses")
+     * @Route("/blacklist", name="blacklistAddresses")
      */
     public function blacklist(): Response
     {
@@ -87,7 +142,7 @@ class AddressController extends AbstractController
     }
 
     /**
-     * @Route("/address/get/{id}", name="findAddress")
+     * @Route("/get/{id}", name="findAddress")
      */
     public function find(Address $address): Response
     {
@@ -95,23 +150,23 @@ class AddressController extends AbstractController
     }
 
     /**
-     * @Route("/address/update/{id}", name="updateAddress")
+     * @Route("/update/{id}", name="updateAddress")
      */
     public function update(Request $request, Address $address): Response
     {
-        $response = [
-            'success' => true,
-            'text' => 'Address updated',
-        ];
-
         $this->setData($request, $address);
         $this->entityManager->flush();
 
-        return $this->json($response);
+        return $this->json(
+            [
+                'success' => true,
+                'text' => 'Address updated',
+            ]
+        );
     }
 
     /**
-     * @Route("/address/delete/{id}", name="deleteAddress")
+     * @Route("/delete/{id}", name="deleteAddress")
      */
     public function delete(Address $address): Response
     {
@@ -121,7 +176,7 @@ class AddressController extends AbstractController
     }
 
     /**
-     * @Route("/address/add_to_blacklist/{id}", name="addAddressToBlacklist")
+     * @Route("/add_to_blacklist/{id}", name="addAddressToBlacklist")
      */
     public function addToBlacklist(Address $address): Response
     {

@@ -9,15 +9,15 @@ let addressList = $('#addressList').DataTable({
     },
   },
   columns: [
-    { data: 'company' },
-    { data: 'street' },
-    { data: 'zip' },
-    { data: 'city' },
-    { data: 'country' },
-    { data: 'gender' },
-    { data: 'firstName' },
-    { data: 'lastName' },
-    { data: 'phone' },
+    { data: 'company', name: 'company' },
+    { data: 'street', name: 'street' },
+    { data: 'zip', name: 'zip' },
+    { data: 'city', name: 'city' },
+    { data: 'country', name: 'country' },
+    { data: 'gender', name: 'gender' },
+    { data: 'firstName', name: 'first_name' },
+    { data: 'lastName', name: 'last_name' },
+    { data: 'phone', name: 'phone' },
     { data: 'status' },
     { data: 'reaction.name' },
     {
@@ -308,8 +308,8 @@ $('#createTemplateForm').on('submit', function (event) {
   event.preventDefault()
   const submit = $(this).find('button[type=submit]')
   submit.attr('disabled', true)
-  const templateId = $('#template_id').val();
-  const requestUrl = templateId ? `/template/update/${templateId}` : '/template/save';
+  const templateId = $('#template_id').val()
+  const requestUrl = templateId ? `/template/update/${templateId}` : '/template/save'
   $.post(requestUrl, $(this).serialize(), res => {
     if (res.success) {
       templateList.ajax.reload()
