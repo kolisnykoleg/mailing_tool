@@ -308,7 +308,9 @@ $('#createTemplateForm').on('submit', function (event) {
   event.preventDefault()
   const submit = $(this).find('button[type=submit]')
   submit.attr('disabled', true)
-  $.post('/template/save', $(this).serialize(), res => {
+  const templateId = $('#template_id').val();
+  const requestUrl = templateId ? `/template/update/${templateId}` : '/template/save';
+  $.post(requestUrl, $(this).serialize(), res => {
     if (res.success) {
       templateList.ajax.reload()
       $('#createTemplateFormModal').modal('hide')
@@ -336,7 +338,7 @@ $(document).on('click', '.edit-template-btn', function () {
     $('#template_name').val(res.name)
     $('#template_section').val(res.section)
     $('#template_id').val(res.id)
-    templateCodeMirror.setValue(res.file)
+    templateCodeMirror.setValue(res.content)
     $('#createTemplateFormModal').modal('show')
   })
 })
