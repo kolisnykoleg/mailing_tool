@@ -134,6 +134,9 @@ class ImportController extends AbstractController
             foreach ($data as $key => $val) {
                 $address->{"set$key"}(trim($val));
             }
+            if ($street = $address->getStreet()) {
+                $address->setStreetFormat($street);
+            }
             if (!empty($pool)) {
                 $address->setPool($pool);
             }

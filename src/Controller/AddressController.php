@@ -181,6 +181,7 @@ class AddressController extends AbstractController
     {
         $address->setCompany($request->get('company'));
         $address->setStreet($request->get('street'));
+        $address->setStreetFormat($request->get('street'));
         $address->setZip($request->get('zip'));
         $address->setCity($request->get('city'));
         $address->setCountry($request->get('country'));

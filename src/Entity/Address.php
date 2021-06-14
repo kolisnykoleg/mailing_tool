@@ -185,6 +185,37 @@ class Address
 
     public function setStreetFormat(?string $street_format): self
     {
+        if ($street_format) {
+            $replaceChars = [
+                'ß' => 'ss',
+                'Ä' => 'ae',
+                'ä' => 'ae',
+                'Ö' => 'oe',
+                'ö' => 'oe',
+                'Ü' => 'ue',
+                'ü' => 'ue',
+                'è' => 'e',
+                'é' => 'e',
+                '‑' => '-',
+                '.' => '',
+                ',' => '',
+                ' ' => '',
+                "\xc2\xa0" => '',
+            ];
+            $street_format = str_replace(array_keys($replaceChars), array_values($replaceChars), $street_format);
+
+            $streetNumber = [];
+            if (preg_match('/(\d+-\d+)/m', $street_format, $streetNumber)) {
+                $street_format = str_replace([$streetNumber[0], '-'], '', $street_format) . $streetNumber[0];
+            } else {
+                $street_format = str_replace('-', '', $street_format);
+            }
+
+            $street_format = strtolower($street_format);
+            $street_format = preg_replace('/(.*)str([\d|\-|\s]+)/m', '$1strasse$2', $street_format);
+            $street_format = preg_replace('/([^\d]+)([\d|\-]+)(.*)/m', '$1 $2', $street_format);
+        }
+
         $this->street_format = $street_format;
 
         return $this;
@@ -233,6 +264,15 @@ class Address
 
     public function setGender(?string $gender): self
     {
+        if (strlen($gender)) {
+            $gender = strtolower($gender[0]);
+            if ($gender === 'm' || $gender === 'h') {
+                $gender = 'm';
+            } else {
+                $gender = 'f';
+            }
+        }
+
         $this->gender = $gender;
 
         return $this;
