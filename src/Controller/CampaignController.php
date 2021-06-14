@@ -137,41 +137,36 @@ class CampaignController extends AbstractController
         $this->entityManager->persist($campaign);
         $this->entityManager->flush();
 
-        return $this->json(
-            [
-                'success' => true,
-                'text' => 'Mailing created',
-            ]
-        );
+        return $this->json(['text' => 'Mailing created']);
     }
 
     /**
-     * @Route("/roll", name="listCampaigns")
+     * @Route("/list", name="listCampaigns")
      */
     public function list(Request $request): Response
     {
         $campaigns = $this->campaignRepository->findAll();
-        return $this->json(['data' => $campaigns]);
+        return $this->json($campaigns);
     }
 
     /**
-     * @Route("/roll/pool/{id}", name="listCampaignsForPool")
+     * @Route("/list/pool/{id}", name="listCampaignsForPool")
      */
     public function listForPool(Pool $pool): Response
     {
         $campaigns = $pool->_getCampaigns();
-        return $this->json(['data' => $campaigns]);
+        return $this->json($campaigns);
     }
 
     /**
-     * @Route("/roll/address/{id}", name="listCampaingnsForAddress")
+     * @Route("/list/address/{id}", name="listCampaingnsForAddress")
      */
     public function listForAddress(Address $address): Response
     {
         $addressCampaigns = $address->_getCampaigns()->toArray();
         $addressPoolCampaigns = $address->getPool()->_getCampaigns()->toArray();
         $campaigns = array_merge($addressCampaigns, $addressPoolCampaigns);
-        return $this->json(['data' => $campaigns]);
+        return $this->json($campaigns);
     }
 
     private function getSalutation(Address $address): string

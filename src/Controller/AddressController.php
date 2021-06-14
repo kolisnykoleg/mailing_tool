@@ -59,16 +59,11 @@ class AddressController extends AbstractController
         $this->entityManager->persist($address);
         $this->entityManager->flush();
 
-        return $this->json(
-            [
-                'success' => true,
-                'text' => 'Address saved',
-            ]
-        );
+        return $this->json(['text' => 'Address saved']);
     }
 
     /**
-     * @Route("/roll", name="listAddresses")
+     * @Route("/list", name="listAddresses")
      */
     public function list(Request $request): Response
     {
@@ -122,7 +117,7 @@ class AddressController extends AbstractController
             ->getQuery()
             ->getResult();
 
-        return $this->json(['data' => $addresses]);
+        return $this->json($addresses);
     }
 
     /**
@@ -135,7 +130,7 @@ class AddressController extends AbstractController
                 'blacklist' => true,
             ]
         );
-        return $this->json(['data' => $blacklist]);
+        return $this->json($blacklist);
     }
 
     /**
@@ -154,12 +149,7 @@ class AddressController extends AbstractController
         $this->setData($request, $address);
         $this->entityManager->flush();
 
-        return $this->json(
-            [
-                'success' => true,
-                'text' => 'Address updated',
-            ]
-        );
+        return $this->json(['text' => 'Address updated']);
     }
 
     /**
@@ -173,7 +163,7 @@ class AddressController extends AbstractController
     }
 
     /**
-     * @Route("/add_to_blacklist/{id}", name="addAddressToBlacklist")
+     * @Route("/add-to-blacklist/{id}", name="addAddressToBlacklist")
      */
     public function addToBlacklist(Address $address): Response
     {

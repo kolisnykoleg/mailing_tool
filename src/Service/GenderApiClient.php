@@ -47,7 +47,7 @@ class GenderApiClient
         $response = $this->client->request('GET', "https://gender-api.com/get-stats?key=$this->key");
         $data = $response->toArray();
         if (isset($data['errno'])) {
-            throw new \HttpRequestException("Gender API: $data[errmsg]", $data['errno']);
+            throw new \Exception("Gender API: $data[errmsg]", $data['errno']);
         }
         return $data;
     }
@@ -76,7 +76,7 @@ class GenderApiClient
 
             $data = $response->toArray();
             if (isset($data['errno'])) {
-                throw new \HttpRequestException("Gender API: $data[errmsg]", $data['errno']);
+                throw new \Exception("Gender API: $data[errmsg]", $data['errno']);
             }
 
             $nameGender = new NameGender();

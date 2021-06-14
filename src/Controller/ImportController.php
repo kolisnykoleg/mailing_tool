@@ -15,6 +15,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * @Route("/import")
+ */
 class ImportController extends AbstractController
 {
     /**
@@ -50,15 +53,10 @@ class ImportController extends AbstractController
     }
 
     /**
-     * @Route("/import", name="import")
+     * @Route("", name="import")
      */
-    public function index(Request $request, GenderApiClient $genderApiClient): Response
+    public function import(Request $request, GenderApiClient $genderApiClient): Response
     {
-        $response = [
-            'success' => true,
-            'text' => 'Import complete',
-        ];
-
         $filePath = $request->get('file_name');
         $fileName = pathinfo($filePath, PATHINFO_FILENAME);
         $genderAuto = $request->get('gender_auto');
@@ -117,7 +115,6 @@ class ImportController extends AbstractController
             }
         }
 
-        $errorCount = 0;
         foreach ($reader->getActiveSheet()->getRowIterator(2) as $row) {
             $data = [];
             $cellIterator = $row->getCellIterator();
@@ -131,32 +128,21 @@ class ImportController extends AbstractController
                 }
             }
 
-            try {
-                $address = new Address();
-                $address->setBlacklist(false);
-                $address->setReaction($this->reactionRepository->find(1));
-                foreach ($data as $key => $val) {
-                    $address->{"set$key"}(trim($val));
-                }
-                if (!empty($pool)) {
-                    $address->setPool($pool);
-                }
-                if ($genderAuto) {
-                    $address->setGender($genderApiClient->getGender($address->getFirstName()));
-                }
-                $this->entityManager->persist($address);
-                $this->entityManager->flush();
-            } catch (\HttpRequestException $e) {
-                return $this->json(
-                    [
-                        'success' => false,
-                        'text' => $e->getMessage(),
-                    ]
-                );
-            } catch (\Exception $e) {
-                $errorCount++;
+            $address = new Address();
+            $address->setBlacklist(false);
+            $address->setReaction($this->reactionRepository->find(1));
+            foreach ($data as $key => $val) {
+                $address->{"set$key"}(trim($val));
             }
+            if (!empty($pool)) {
+                $address->setPool($pool);
+            }
+            if ($genderAuto) {
+                $address->setGender($genderApiClient->getGender($address->getFirstName()));
+            }
+            $this->entityManager->persist($address);
         }
+        $this->entityManager->flush();
 
         if (!empty($poolLimit) && $poolType == -2) {
             $this->splitPool($fileName, $poolLimit);
@@ -164,131 +150,65 @@ class ImportController extends AbstractController
             $this->autoPool($fileName);
         }
 
-        if ($errorCount) {
-            $response = [
-                'success' => false,
-                'text' => "Duplicate addresses: $errorCount",
-            ];
-        }
-
-        return $this->json($response);
+        return $this->json(['text' => 'Import complete']);
     }
 
     /**
-     * @Route("/import/upload", name="uploadImportFile")
+     * @Route("/upload", name="uploadImportFile")
      */
     public function uploadFile(Request $request): Response
     {
         $importFile = $request->files->get('file');
         $fileName = $importFile->getClientOriginalName();
         $uploadsDir = $this->getParameter('uploads_dir');
+        $importFile->move($uploadsDir, $fileName);
 
-        try {
-            $importFile->move($uploadsDir, $fileName);
-            $response = [
-                'success' => true,
-                'text' => "$uploadsDir/$fileName",
-            ];
-        } catch (\Exception $e) {
-            $response = [
-                'success' => false,
-                'text' => $e->getMessage(),
-            ];
-        }
-
-        return $this->json($response);
+        return $this->json(['text' => "$uploadsDir/$fileName"]);
     }
 
     /**
-     * @Route("/import/amount", name="countRowsImport")
+     * @Route("/amount", name="countRowsImport")
      */
     public function countRows(Request $request): Response
     {
         $filePath = $request->get('fileName');
+        $reader = IOFactory::createReaderForFile($filePath)
+            ->setReadDataOnly(true)
+            ->load($filePath);
 
-        try {
-            $reader = IOFactory::createReaderForFile($filePath)
-                ->setReadDataOnly(true)
-                ->load($filePath);
+        $amount = $reader->getActiveSheet()->getHighestRow() - 1;
 
-            $amount = $reader->getActiveSheet()->getHighestRow() - 1;
-            $response = [
-                'success' => true,
-                'text' => "$amount entries",
-            ];
-        } catch (\Exception $e) {
-            $response = [
-                'success' => false,
-                'text' => $e->getMessage(),
-            ];
-        }
-
-        return $this->json($response);
+        return $this->json(['text' => "$amount entries"]);
     }
 
     /**
-     * @Route("/import/titles", name="getTitlesImport")
+     * @Route("/titles", name="getTitlesImport")
      */
     public function getTitles(Request $request): Response
     {
         $filePath = $request->get('fileName');
+        $reader = IOFactory::createReaderForFile($filePath)
+            ->setReadDataOnly(true)
+            ->load($filePath);
 
-        $response = [
-            'success' => true,
-            'text' => [
-                [
-                    'id' => '',
-                    'text' => '',
-                    'selected' => true,
-                    'disabled' => true,
-                ]
-            ],
-        ];
-
-        try {
-            $reader = IOFactory::createReaderForFile($filePath)
-                ->setReadDataOnly(true)
-                ->load($filePath);
-
-            $row = $reader->getActiveSheet()->getRowIterator()->current();
-            $cellIterator = $row->getCellIterator();
-            foreach ($cellIterator as $cell) {
-                if (is_null($value = $cell->getValue())) {
-                    continue;
-                }
-                $response['text'][] = [
-                    'id' => $value,
-                    'text' => $value,
-                ];
+        $row = $reader->getActiveSheet()->getRowIterator()->current();
+        $cellIterator = $row->getCellIterator();
+        foreach ($cellIterator as $cell) {
+            if (is_null($value = $cell->getValue())) {
+                continue;
             }
-        } catch (\Exception $e) {
-            $response = [
-                'success' => false,
-                'text' => $e->getMessage(),
-            ];
+            $titles[] = $value;
         }
 
-        return $this->json($response);
+        return $this->json($titles);
     }
 
     /**
-     * @Route("/import/gender_api_stats", name="genderApiStats")
+     * @Route("/gender-api-stats", name="genderApiStats")
      */
     public function genderApiStats(GenderApiClient $genderApiClient): Response
     {
-        try {
-            $response = [
-                'success' => true,
-                'text' => $genderApiClient->getStats(),
-            ];
-        } catch (\Exception $e) {
-            $response = [
-                'success' => false,
-                'text' => $e->getMessage(),
-            ];
-        }
-
-        return $this->json($response);
+        return $this->json(['text' => $genderApiClient->getStats()]);
     }
 
     private function autoPool(string $name)
@@ -319,16 +239,16 @@ class ImportController extends AbstractController
             $pool = new Pool();
             $pool->setName("$name $index");
             $this->entityManager->persist($pool);
-            $this->entityManager->flush();
 
             foreach ($locations as $key => &$addresses) {
                 $address = array_shift($addresses);
                 $address->setPool($pool);
-                $this->entityManager->flush();
                 if (empty($addresses)) {
                     unset($locations[$key]);
                 }
             }
+
+            $this->entityManager->flush();
             $index++;
         }
     }
@@ -380,13 +300,12 @@ class ImportController extends AbstractController
             $pool = new Pool();
             $pool->setName("$name $index");
             $this->entityManager->persist($pool);
-            $this->entityManager->flush();
 
             foreach ($addresses as $address) {
                 $address->setPool($pool);
-                $this->entityManager->flush();
             }
 
+            $this->entityManager->flush();
             $index++;
         }
     }

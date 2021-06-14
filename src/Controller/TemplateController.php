@@ -34,7 +34,7 @@ class TemplateController extends AbstractController
     }
 
     /**
-     * @Route("/save", name="createTemplate")
+     * @Route("/create", name="createTemplate")
      */
     public function create(Request $request): Response
     {
@@ -43,21 +43,16 @@ class TemplateController extends AbstractController
         $this->entityManager->persist($template);
         $this->entityManager->flush();
 
-        return $this->json(
-            [
-                'success' => true,
-                'text' => 'Template saved',
-            ]
-        );
+        return $this->json(['text' => 'Template saved']);
     }
 
     /**
-     * @Route("/roll", name="listTemplates")
+     * @Route("/list", name="listTemplates")
      */
     public function list(): Response
     {
         $templates = $this->templateRepository->findAll();
-        return $this->json(['data' => $templates]);
+        return $this->json($templates);
     }
 
     /**
@@ -76,16 +71,11 @@ class TemplateController extends AbstractController
         $this->setData($request, $template);
         $this->entityManager->flush();
 
-        return $this->json(
-            [
-                'success' => true,
-                'text' => 'Template updated',
-            ]
-        );
+        return $this->json(['text' => 'Template updated']);
     }
 
     /**
-     * @Route("/preview")
+     * @Route("/preview", name="previewTemplate")
      */
     public function preview(Request $request): Response
     {

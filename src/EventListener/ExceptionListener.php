@@ -18,7 +18,6 @@ class ExceptionListener
         // Customize your response object to display the exception details
         $response = new JsonResponse(
             [
-                'success' => false,
                 'text' => $exception->getMessage(),
             ]
         );

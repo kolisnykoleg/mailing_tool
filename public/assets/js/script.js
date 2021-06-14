@@ -1,7 +1,8 @@
 let addressList = $('#addressList').DataTable({
   ajax: {
-    url: '/address/roll',
+    url: '/address/list',
     type: 'POST',
+    dataSrc: '',
     data: data => {
       data.pools = $('#poolSelect').val()
       data.duplicates = $('#duplicatesSelect').val()
@@ -122,7 +123,9 @@ $(document).on('click', '#searchBarToggle', function () {
 
 let poolList = $('#poolList').DataTable({
   ajax: {
-    url: '/pool/roll',
+    url: '/pool/list',
+    type: 'POST',
+    dataSrc: '',
   },
   columns: [
     {
@@ -164,14 +167,13 @@ $('#createPoolForm').submit(function (event) {
   const poolId = $(this).find('input[name="id"]').val()
   let requestUrl = poolId ? `/pool/update/${poolId}` : '/pool/create'
   $.post(requestUrl, $(this).serialize(), res => {
-    if (res.success) {
-      $(this).trigger('reset')
-      $('[data-toggle=tooltip]', this).tooltip('hide')
-      poolList.ajax.reload()
-      initPoolSelect()
-    }
-    showAlert(res)
+    $(this).trigger('reset')
+    $('[data-toggle=tooltip]', this).tooltip('hide')
+    poolList.ajax.reload()
+    initPoolSelect()
+    showAlert(res, true)
   })
+    .fail(ajaxFail)
 })
 
 $('#createAddressForm').submit(function (event) {
@@ -179,14 +181,13 @@ $('#createAddressForm').submit(function (event) {
   const addressId = $(this).find('[name=id]').val()
   const requestUrl = addressId ? `/address/update/${addressId}` : '/address/create'
   $.post(requestUrl, $(this).serialize(), res => {
-    if (res.success) {
-      if (!addressId) {
-        addressList.ajax.reload()
-      }
-      $('#createAddressFormModal').modal('hide')
+    if (!addressId) {
+      addressList.ajax.reload()
     }
-    showAlert(res)
+    $('#createAddressFormModal').modal('hide')
+    showAlert(res, true)
   })
+    .fail(ajaxFail)
 })
 
 $(document).on('click', '.add-address-btn', function () {
@@ -199,7 +200,7 @@ $(document).on('click', '.edit-pool-btn', function () {
   $.get('/pool/get/' + $(this).data('id'), res => {
     $('#createPoolForm').find('input[name=name]').val(res.name)
     $('#createPoolForm').find('input[name=id]').val(res.id)
-    $('#createPoolForm').find('input[name=color]').val(res.color)
+    $('#createPoolForm').find('input[name=color]').val(res.color || '#ffffff')
     $('#createPoolForm').find('[data-toggle=tooltip]').tooltip('show')
   })
 })
@@ -229,7 +230,7 @@ $(document).on('click', '.edit-address-btn', function () {
     $('#poolSelectForm').val(res.pool.id).trigger('change')
     $('#reactionSelect').val(res.reaction.id).trigger('change')
     $('#address_id').val(res.id)
-    addressMailingList.ajax.url(`/campaign/roll/address/${res.id}`).load()
+    addressMailingList.ajax.url(`/campaign/list/address/${res.id}`).load()
     $('#blacklistBtn').data('id', res.id)
     $('#createAddressFormModal').modal('show')
   })
@@ -251,7 +252,7 @@ $('#selectColForm').on('submit', function (event) {
   $(this).find('button[type=submit]').attr('disabled', true)
   $(this).find('input[name=file_name]').val(fileName)
   $.post('/import', $(this).serialize(), res => {
-    showAlert(res)
+    showAlert(res, true)
     pond.removeFile()
     addressList.ajax.reload()
     poolList.ajax.reload()
@@ -259,6 +260,7 @@ $('#selectColForm').on('submit', function (event) {
     $('#poolLimitWrap').hide()
     initPoolSelect()
   }, 'json')
+    .fail(ajaxFail)
     .always(() => {
       $(this).find('button[type=submit]').attr('disabled', false)
       updateGenderApiStats()
@@ -273,7 +275,9 @@ $('.select-col').each(function () {
 
 let templateList = $('#templateList').DataTable({
   ajax: {
-    url: '/template/roll',
+    url: '/template/list',
+    type: 'POST',
+    dataSrc: '',
   },
   columns: [
     { data: 'name' },
@@ -307,17 +311,17 @@ $('#createTemplateForm').on('submit', function (event) {
   const submit = $(this).find('button[type=submit]')
   submit.attr('disabled', true)
   const templateId = $('#template_id').val()
-  const requestUrl = templateId ? `/template/update/${templateId}` : '/template/save'
+  const requestUrl = templateId ? `/template/update/${templateId}` : '/template/create'
   $.post(requestUrl, $(this).serialize(), res => {
-    if (res.success) {
-      templateList.ajax.reload()
-      $('#createTemplateFormModal').modal('hide')
-      initTemplateSelect()
-    }
-    showAlert(res)
-  }).always(() => {
-    submit.attr('disabled', false)
+    templateList.ajax.reload()
+    $('#createTemplateFormModal').modal('hide')
+    initTemplateSelect()
+    showAlert(res, true)
   })
+    .fail(ajaxFail)
+    .always(() => {
+      submit.attr('disabled', false)
+    })
 })
 
 $('#createTemplateFormModal').on('shown.bs.modal', function () {
@@ -354,27 +358,27 @@ $('#mailingForm').on('submit', function (event) {
   const submit = $('button[type=submit]', this)
   submit.attr('disabled', true)
   $.post('/campaign/create', $(this).serialize(), res => {
-    if (res.success) {
-      mailingList.ajax.reload()
-      poolList.ajax.reload()
-    }
-    showAlert(res)
-  }).always(() => {
-    submit.attr('disabled', false)
+    mailingList.ajax.reload()
+    poolList.ajax.reload()
+    showAlert(res, true)
   })
+    .fail(ajaxFail)
+    .always(() => {
+      submit.attr('disabled', false)
+    })
 })
 
 let mailingList = $('#mailingList').DataTable({
   ajax: {
-    url: '/campaign/roll',
+    url: '/campaign/list',
     type: 'POST',
+    dataSrc: '',
   },
   columns: [
-    { data: 'id' },
     {
       data: null,
       render: data => {
-        return data && data.pool && data.pool.name;
+        return data && data.pool && data.pool.name
       }
     },
     { data: 'template.name' },
@@ -401,6 +405,11 @@ let mailingList = $('#mailingList').DataTable({
 })
 
 let addressMailingList = $('#addressMailingList').DataTable({
+  ajax: {
+    url: '/campaign/list',
+    type: 'POST',
+    dataSrc: '',
+  },
   columns: [
     { data: 'template.name' },
     { data: 'template.section' },
@@ -444,9 +453,9 @@ initReactionSelect()
 
 $(document).on('click', '.mailing-pool-filter', function (event) {
   event.preventDefault()
-  const poolId = $(this).data('pool-id');
-  mailingList.ajax.url(`/campaign/roll/pool/${poolId}`).load()
-  mailingList.ajax.url('/campaign/roll');
+  const poolId = $(this).data('pool-id')
+  mailingList.ajax.url(`/campaign/list/pool/${poolId}`).load()
+  mailingList.ajax.url('/campaign/list')
   $('#navMailingsTab').click()
 })
 
@@ -461,7 +470,7 @@ $(document).on('click', '#blacklistBtn', function (event) {
   }
 
   const addressId = $(this).data('id')
-  $.get('/address/add_to_blacklist/' + addressId, () => {
+  $.get('/address/add-to-blacklist/' + addressId, () => {
     $('#createAddressFormModal').modal('hide')
     addressList
       .row($('#row_' + addressId))
@@ -499,20 +508,21 @@ $(document).on('click', '#addressCreateMailing', function (event) {
     address_id,
     pool: -1,
   }, res => {
-    if (res.success) {
-      mailingList.ajax.reload()
-      $('#createAddressFormModal').modal('hide')
-    }
-    showAlert(res)
-  }).always(() => {
-    $(this).attr('disabled', false)
+    mailingList.ajax.reload()
+    $('#createAddressFormModal').modal('hide')
+    showAlert(res, true)
   })
+    .fail(ajaxFail)
+    .always(() => {
+      $(this).attr('disabled', false)
+    })
 })
 
 let blackList = $('#blackList').DataTable({
   ajax: {
     url: '/address/blacklist',
     type: 'POST',
+    dataSrc: '',
   },
   columns: [
     { data: 'company' },
@@ -533,7 +543,9 @@ let blackList = $('#blackList').DataTable({
 
 let actionList = $('#actionList').DataTable({
   ajax: {
-    url: '/reaction/roll',
+    url: '/reaction/list',
+    type: 'POST',
+    dataSrc: '',
   },
   columns: [
     { data: 'id' },
@@ -547,13 +559,12 @@ let actionList = $('#actionList').DataTable({
 $('#createActionForm').on('submit', function (event) {
   event.preventDefault()
   $.post('/reaction/create', $(this).serialize(), res => {
-    if (res.success) {
-      $(this).trigger('reset')
-      actionList.ajax.reload()
-      initReactionSelect()
-    }
-    showAlert(res)
+    $(this).trigger('reset')
+    actionList.ajax.reload()
+    initReactionSelect()
+    showAlert(res, true)
   })
+    .fail(ajaxFail)
 })
 
 $('#duplicatesSelect')
@@ -573,28 +584,33 @@ $('#duplicatesSelect')
 
 function getImportTitles () {
   $.post('/import/titles', { fileName }, res => {
-    if (res.success) {
-      $('.select-col').each(function () {
-        $(this).select2({
-          data: res.text,
-          theme: 'bootstrap4',
-        })
+    $('.select-col').each(function () {
+      $(this).select2({
+        data: [
+          {
+            id: '',
+            text: '',
+            selected: true,
+            disabled: true,
+          },
+          ...res,
+        ],
+        theme: 'bootstrap4',
       })
-    } else {
-      showAlert(res)
-    }
+    })
   })
 }
 
 function getImportAmount () {
   $.post('/import/amount', { fileName }, res => {
-    showAlert(res)
+    showAlert(res, true)
   })
+    .fail(ajaxFail)
 }
 
 function initPoolSelect () {
-  $.get('/pool/roll', res => {
-    const data = res.data.map(item => {
+  $.get('/pool/list', res => {
+    const data = res.map(item => {
       return {
         id: item.id,
         text: item.name,
@@ -669,13 +685,13 @@ function initPoolSelect () {
 }
 
 function initTemplateSelect () {
-  $.get('/template/roll', res => {
+  $.get('/template/list', res => {
     const data = [{
       id: '',
       text: '',
       selected: true,
       disabled: true,
-    }, ...res.data.map(item => {
+    }, ...res.map(item => {
       return {
         id: item.id,
         text: `${item.name} (${item.section})`,
@@ -693,12 +709,12 @@ function initTemplateSelect () {
   })
 }
 
-function showAlert (res) {
-  const alert = $(`<div class="alert alert-${res.success ? 'success' : 'danger'} fade show" role="alert">${res.text}</div>`)
+function showAlert (res, success) {
+  const alert = $(`<div class="alert alert-${success ? 'success' : 'danger'} fade show" role="alert">${res.text}</div>`)
   alert.prependTo($('.container-fluid'))
   setTimeout(() => {
     alert.alert('close')
-  }, 2500)
+  }, 3000)
 }
 
 function updateAddressRow (addressId) {
@@ -715,10 +731,10 @@ function updateAddressRow (addressId) {
 }
 
 function initReactionSelect () {
-  $.get('/reaction/roll', res => {
+  $.get('/reaction/list', res => {
     $('#reactionSelect').empty()
     $('#reactionSelect').select2({
-      data: res.data.map(item => {
+      data: res.map(item => {
         return {
           id: item.id,
           text: item.name,
@@ -734,7 +750,7 @@ function initReactionSelect () {
           id: '',
           text: '',
         },
-        ...res.data.map(item => {
+        ...res.map(item => {
           return {
             id: item.id,
             text: item.name,
@@ -747,13 +763,14 @@ function initReactionSelect () {
 }
 
 function updateGenderApiStats () {
-  $.get('/import/gender_api_stats', res => {
-    if (res.success) {
-      $('#genderApiStats').text('remaining requests: ' + res.text.remaining_requests)
-    } else {
-      showAlert(res)
-    }
+  $.get('/import/gender-api-stats', res => {
+    $('#genderApiStats').text('remaining requests: ' + res.text.remaining_requests)
   })
+    .fail(ajaxFail)
+}
+
+function ajaxFail (xhr) {
+  showAlert(xhr.responseJSON, false)
 }
 
 updateGenderApiStats()
