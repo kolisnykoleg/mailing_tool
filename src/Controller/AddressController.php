@@ -111,6 +111,9 @@ class AddressController extends AbstractController
             }
 
             $query->andWhere($query->expr()->in('a.id', $duplicateIds));
+            $query->andWhere('a.blacklist = 1');
+        } else {
+            $query->andWhere('a.blacklist = 0');
         }
 
         $addresses = $query
@@ -159,7 +162,8 @@ class AddressController extends AbstractController
     {
         $this->entityManager->remove($address);
         $this->entityManager->flush();
-        return new Response();
+
+        return $this->json(['text' => 'Address deleted']);
     }
 
     /**
@@ -169,7 +173,8 @@ class AddressController extends AbstractController
     {
         $address->setBlacklist(true);
         $this->entityManager->flush();
-        return new Response();
+
+        return $this->json(['text' => 'Address added to blacklist']);
     }
 
     private function setData(Request $request, Address &$address)

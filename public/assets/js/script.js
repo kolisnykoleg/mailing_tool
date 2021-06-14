@@ -470,7 +470,8 @@ $(document).on('click', '#blacklistBtn', function (event) {
   }
 
   const addressId = $(this).data('id')
-  $.get('/address/add-to-blacklist/' + addressId, () => {
+  $.get('/address/add-to-blacklist/' + addressId, res => {
+    showAlert(res, true)
     $('#createAddressFormModal').modal('hide')
     addressList
       .row($('#row_' + addressId))
@@ -478,6 +479,7 @@ $(document).on('click', '#blacklistBtn', function (event) {
       .draw()
     blackList.ajax.reload()
   })
+    .fail(ajaxFail)
 })
 
 $(document).on('click', '#deleteAddress', function (event) {
@@ -487,13 +489,15 @@ $(document).on('click', '#deleteAddress', function (event) {
   }
 
   const addressId = $('#address_id').val()
-  $.get('/address/delete/' + addressId, () => {
+  $.get('/address/delete/' + addressId, res => {
+    showAlert(res, true)
     $('#createAddressFormModal').modal('hide')
     addressList
       .row($('#row_' + addressId))
       .remove()
       .draw()
   })
+    .fail(ajaxFail)
 })
 
 $(document).on('click', '#addressCreateMailing', function (event) {
