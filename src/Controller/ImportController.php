@@ -160,7 +160,7 @@ class ImportController extends AbstractController
 
         if (!empty($poolLimit) && $poolType == -2) {
             $this->splitPool($fileName, $poolLimit);
-        } elseif ($poolType == -2) {
+        } elseif ($poolType == 0) {
             $this->autoPool($fileName);
         }
 

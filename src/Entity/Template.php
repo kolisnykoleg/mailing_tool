@@ -88,7 +88,7 @@ class Template
     /**
      * @return Collection|Campaign[]
      */
-    public function getCampaigns(): Collection
+    public function _getCampaigns(): Collection
     {
         return $this->campaigns;
     }

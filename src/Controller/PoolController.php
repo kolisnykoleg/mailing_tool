@@ -74,13 +74,14 @@ class PoolController extends AbstractController
     {
         $pools = $this->poolRepository->findAll();
         $data = array_map(function ($pool) {
+            $lastMailing = $pool->_getCampaigns()->last();
             return [
                 'id' => $pool->getId(),
                 'name' => $pool->getName(),
                 'color' => $pool->getColor(),
                 'address_count' => $pool->_getAddresses()->count(),
                 'mailing_count' => $pool->_getCampaigns()->count(),
-                'mailing_date' => $pool->_getCampaigns()->last(),
+                'mailing_date' => $lastMailing ? $lastMailing->getDate() : '',
             ];
         }, $pools);
         return $this->json(['data' => $data]);

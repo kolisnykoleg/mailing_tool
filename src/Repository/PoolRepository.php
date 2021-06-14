@@ -30,7 +30,7 @@ class PoolRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
 
         return $pool
-            ? array_slice(explode(substr($name, -1), $pool->getName()), -1)[0] + 1
+            ? (int)array_slice(explode(substr($name, -1), $pool->getName()), -1)[0] + 1
             : 1;
     }
 

@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\AddressRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -136,6 +138,16 @@ class Address
      * @ORM\ManyToOne(targetEntity=Reaction::class, inversedBy="addresses")
      */
     private $reaction;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Campaign::class, mappedBy="address")
+     */
+    private $campaigns;
+
+    public function __construct()
+    {
+        $this->campaigns = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -426,6 +438,36 @@ class Address
     public function setReaction(?Reaction $reaction): self
     {
         $this->reaction = $reaction;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Campaign[]
+     */
+    public function _getCampaigns(): Collection
+    {
+        return $this->campaigns;
+    }
+
+    public function addCampaign(Campaign $campaign): self
+    {
+        if (!$this->campaigns->contains($campaign)) {
+            $this->campaigns[] = $campaign;
+            $campaign->setAddress($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCampaign(Campaign $campaign): self
+    {
+        if ($this->campaigns->removeElement($campaign)) {
+            // set the owning side to null (unless already changed)
+            if ($campaign->getAddress() === $this) {
+                $campaign->setAddress(null);
+            }
+        }
 
         return $this;
     }

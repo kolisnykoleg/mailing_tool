@@ -37,6 +37,11 @@ class Campaign
      */
     private $pool;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Address::class, inversedBy="campaigns")
+     */
+    private $address;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -86,6 +91,18 @@ class Campaign
     public function setPool(?Pool $pool): self
     {
         $this->pool = $pool;
+
+        return $this;
+    }
+
+    public function _getAddress(): ?Address
+    {
+        return $this->address;
+    }
+
+    public function setAddress(?Address $address): self
+    {
+        $this->address = $address;
 
         return $this;
     }

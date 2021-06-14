@@ -229,8 +229,7 @@ $(document).on('click', '.edit-address-btn', function () {
     $('#poolSelectForm').val(res.pool.id).trigger('change')
     $('#reactionSelect').val(res.reaction.id).trigger('change')
     $('#address_id').val(res.id)
-    addressPoolId = res.pool.id
-    addressMailingList.ajax.reload()
+    addressMailingList.ajax.url(`/campaign/roll/address/${res.id}`).load()
     $('#blacklistBtn').data('id', res.id)
     $('#createAddressFormModal').modal('show')
   })
@@ -243,8 +242,7 @@ $('#createAddressFormModal').on('hidden.bs.modal', function () {
   $('#poolSelectForm').val(null).trigger('change')
   $('#reactionSelect').val(1).trigger('change')
   $('#blacklistBtn').data('id', '')
-  addressPoolId = -1
-  addressMailingList.ajax.reload()
+  addressMailingList.clear().draw()
   poolList.ajax.reload()
 })
 
@@ -366,22 +364,21 @@ $('#mailingForm').on('submit', function (event) {
   })
 })
 
-let mailingPoolId = ''
-
 let mailingList = $('#mailingList').DataTable({
   ajax: {
     url: '/campaign/roll',
     type: 'POST',
-    data: data => {
-      data.pool = mailingPoolId
-      return data
-    },
   },
   columns: [
     { data: 'id' },
-    { data: 'pool' },
-    { data: 'template' },
-    { data: 'section' },
+    {
+      data: null,
+      render: data => {
+        return data && data.pool && data.pool.name;
+      }
+    },
+    { data: 'template.name' },
+    { data: 'template.section' },
     { data: 'date' },
     {
       orderable: false,
@@ -403,19 +400,10 @@ let mailingList = $('#mailingList').DataTable({
   searching: false,
 })
 
-let addressPoolId = -1
 let addressMailingList = $('#addressMailingList').DataTable({
-  ajax: {
-    url: '/campaign/roll',
-    type: 'POST',
-    data: data => {
-      data.pool = addressPoolId
-      return data
-    },
-  },
   columns: [
-    { data: 'template' },
-    { data: 'section' },
+    { data: 'template.name' },
+    { data: 'template.section' },
     { data: 'date' },
     {
       orderable: false,
@@ -456,13 +444,13 @@ initReactionSelect()
 
 $(document).on('click', '.mailing-pool-filter', function (event) {
   event.preventDefault()
-  mailingPoolId = $(this).data('pool-id')
-  mailingList.ajax.reload()
+  const poolId = $(this).data('pool-id');
+  mailingList.ajax.url(`/campaign/roll/pool/${poolId}`).load()
+  mailingList.ajax.url('/campaign/roll');
   $('#navMailingsTab').click()
 })
 
 $(document).on('click', '.mailing-pool-all', function () {
-  mailingPoolId = ''
   mailingList.ajax.reload()
 })
 
