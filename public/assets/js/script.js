@@ -246,6 +246,9 @@ $('#createAddressFormModal').on('hidden.bs.modal', function () {
   addressMailingList.clear().draw()
   poolList.ajax.reload()
 })
+  .on('show.bs.modal', function () {
+    addressMailingList.clear().draw()
+  })
 
 $('#selectColForm').on('submit', function (event) {
   event.preventDefault()
