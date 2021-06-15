@@ -11,6 +11,7 @@ use App\Service\GenderApiClient;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -164,7 +165,12 @@ class ImportController extends AbstractController
         $importFile = $request->files->get('file');
         $fileName = $importFile->getClientOriginalName();
         $uploadsDir = $this->getParameter('uploads_dir');
-        $importFile->move($uploadsDir, $fileName);
+        try {
+            $importFile->move($uploadsDir, $fileName);
+        } catch (\Exception $e) {
+            $filesystem = new Filesystem();
+            $filesystem->remove("$uploadsDir/$fileName");
+        }
 
         return $this->json(['text' => "$uploadsDir/$fileName"]);
     }
