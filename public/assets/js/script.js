@@ -65,6 +65,7 @@ let addressList = $('#addressList').DataTable({
   },
   paging: true,
   pageLength: 50,
+  lengthMenu: [[50, 250, 500, -1], [50, 250, 500, 'All']],
   info: true,
   searching: true,
 })
@@ -476,7 +477,7 @@ $(document).on('click', '#blacklistBtn', function (event) {
   $.get('/address/add-to-blacklist/' + addressId, res => {
     showAlert(res, true)
     $('#createAddressFormModal').modal('hide')
-    $('#row_' + addressId).remove();
+    $('#row_' + addressId).remove()
     blackList.ajax.reload()
   })
     .fail(ajaxFail)
@@ -492,7 +493,7 @@ $(document).on('click', '#deleteAddress', function (event) {
   $.get('/address/delete/' + addressId, res => {
     showAlert(res, true)
     $('#createAddressFormModal').modal('hide')
-    $('#row_' + addressId).remove();
+    $('#row_' + addressId).remove()
   })
     .fail(ajaxFail)
 })
