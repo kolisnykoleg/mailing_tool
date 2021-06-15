@@ -476,10 +476,7 @@ $(document).on('click', '#blacklistBtn', function (event) {
   $.get('/address/add-to-blacklist/' + addressId, res => {
     showAlert(res, true)
     $('#createAddressFormModal').modal('hide')
-    addressList
-      .row($('#row_' + addressId))
-      .remove()
-      .draw()
+    $('#row_' + addressId).remove();
     blackList.ajax.reload()
   })
     .fail(ajaxFail)
@@ -495,10 +492,7 @@ $(document).on('click', '#deleteAddress', function (event) {
   $.get('/address/delete/' + addressId, res => {
     showAlert(res, true)
     $('#createAddressFormModal').modal('hide')
-    addressList
-      .row($('#row_' + addressId))
-      .remove()
-      .draw()
+    $('#row_' + addressId).remove();
   })
     .fail(ajaxFail)
 })

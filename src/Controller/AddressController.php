@@ -111,7 +111,6 @@ class AddressController extends AbstractController
             }
 
             $query->andWhere($query->expr()->in('a.id', $duplicateIds));
-            $query->andWhere('a.blacklist = 1');
         } else {
             $query->andWhere('a.blacklist = 0');
         }
