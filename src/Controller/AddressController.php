@@ -72,7 +72,7 @@ class AddressController extends AbstractController
 
         $query = $this->addressRepository->createQueryBuilder('a');
 
-        if ($pools) {
+        if ($pools && !$duplicates) {
             $query
                 ->join('a.pool', 'p')
                 ->andWhere($query->expr()->in('p.id', $pools));
@@ -80,7 +80,7 @@ class AddressController extends AbstractController
 
         if ($duplicates) {
             $cols = join(', ', $duplicates);
-            $wherePool = $pools ? 'WHERE pool_id IN (' . join(', ', $pools) . ')' : '';
+            $wherePool = $pools ? 'WHERE b.pool_id IN (' . join(', ', $pools) . ')' : '';
             $on = join(
                 ' AND ',
                 array_map(
@@ -96,9 +96,8 @@ class AddressController extends AbstractController
                 ->executeQuery(
                     "SELECT a.id, a.pool_id FROM address a
                     JOIN (
-                        SELECT $cols, COUNT(id) AS duplicates
+                        SELECT $cols, pool_id, COUNT(id) AS duplicates
                         FROM address b
-                        $wherePool
                         GROUP BY $cols
                         HAVING duplicates > 1) b
                     ON $on
