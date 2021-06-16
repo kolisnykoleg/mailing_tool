@@ -580,7 +580,7 @@ $('#duplicatesSelect')
     addressList.ajax.reload()
     if (lastValue) {
       const colIndex = addressList.column(lastValue + ':name').index()
-      addressList.order([colIndex, 'asc']).draw()
+      colIndex && addressList.order([colIndex, 'asc']).draw()
     }
   })
 

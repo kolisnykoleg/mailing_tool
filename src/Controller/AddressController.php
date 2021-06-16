@@ -72,51 +72,47 @@ class AddressController extends AbstractController
 
         $query = $this->addressRepository->createQueryBuilder('a');
 
-        if ($pools && !$duplicates) {
-            $query
-                ->join('a.pool', 'p')
-                ->andWhere($query->expr()->in('p.id', $pools));
-        }
-
-        if ($duplicates) {
-            $cols = join(', ', $duplicates);
-            $wherePool = $pools ? 'WHERE b.pool_id IN (' . join(', ', $pools) . ')' : '';
-            $on = join(
-                ' AND ',
-                array_map(
-                    function ($column) {
-                        return "a.$column = b.$column";
-                    },
-                    $duplicates
-                )
-            );
-
-            $duplicateIds = $this->entityManager
-                ->getConnection()
-                ->executeQuery(
-                    "SELECT a.id, a.pool_id FROM address a
-                    JOIN (
-                        SELECT $cols, pool_id, COUNT(id) AS duplicates
-                        FROM address b
-                        GROUP BY $cols
-                        HAVING duplicates > 1) b
-                    ON $on
-                    $wherePool"
-                )
-                ->fetchFirstColumn();
-
-            if (!$duplicateIds) {
-                return $this->json(['data' => []]);
+        if (!$duplicates) {
+            if ($pools) {
+                $query
+                    ->join('a.pool', 'p')
+                    ->andWhere($query->expr()->in('p.id', $pools));
             }
-
-            $query->andWhere($query->expr()->in('a.id', $duplicateIds));
-        } else {
             $query->andWhere('a.blacklist = 0');
         }
 
         $addresses = $query
             ->getQuery()
             ->getResult();
+
+        if ($duplicates) {
+            $duplicateAddresses = [];
+            $len = count($addresses);
+            for ($i = 0; $i < $len; $i++) {
+                for ($j = $i + 1; $j < $len; $j++) {
+                    $isDuplicate = true;
+                    foreach ($duplicates as $duplicate) {
+                        if ($addresses[$i]->{"get$duplicate"}() != $addresses[$j]->{"get$duplicate"}()) {
+                            $isDuplicate = false;
+                            break;
+                        }
+                    }
+                    if ($isDuplicate) {
+                        if (!$pools) {
+                            $duplicateAddresses[$addresses[$i]->getId()] = $addresses[$i];
+                            $duplicateAddresses[$addresses[$j]->getId()] = $addresses[$j];
+                        } elseif (
+                            in_array($addresses[$i]->getPool()->getId(), $pools) ||
+                            in_array($addresses[$j]->getPool()->getId(), $pools)
+                        ) {
+                            $duplicateAddresses[$addresses[$i]->getId()] = $addresses[$i];
+                            $duplicateAddresses[$addresses[$j]->getId()] = $addresses[$j];
+                        }
+                    }
+                }
+            }
+            $addresses = array_values($duplicateAddresses);
+        }
 
         return $this->json($addresses);
     }
