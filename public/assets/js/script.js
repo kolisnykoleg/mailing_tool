@@ -577,7 +577,10 @@ $('#duplicatesSelect')
   })
   .on('change', function () {
     const lastValue = $(this).val().pop()
-    addressList.ajax.reload()
+    $('.spinner-wrap').show()
+    addressList.ajax.reload(() => {
+      $('.spinner-wrap').hide()
+    })
     if (lastValue) {
       const colIndex = addressList.column(lastValue + ':name').index()
       colIndex && addressList.order([colIndex, 'asc']).draw()
@@ -627,7 +630,12 @@ function initPoolSelect () {
         theme: 'bootstrap4',
         placeholder: 'Filter',
       })
-      .on('change', () => addressList.ajax.reload())
+      .on('change', () => {
+        $('.spinner-wrap').show()
+        addressList.ajax.reload(() => {
+          $('.spinner-wrap').hide()
+        })
+      })
 
     $('#poolSelectForm').empty()
     $('#poolSelectForm').select2({
