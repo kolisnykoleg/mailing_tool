@@ -65,7 +65,7 @@ class PoolController extends AbstractController
      */
     public function list(): Response
     {
-        $pools = $this->poolRepository->findAll();
+        $pools = $this->poolRepository->findBy([], ['name' => 'ASC']);
         $data = array_map(
             function ($pool) {
                 $lastMailing = $pool->_getCampaigns()->last();
