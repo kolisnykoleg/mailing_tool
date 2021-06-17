@@ -11,6 +11,7 @@ use App\Service\GenderApiClient;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -212,6 +213,24 @@ class ImportController extends AbstractController
     public function genderApiStats(GenderApiClient $genderApiClient): Response
     {
         return $this->json(['text' => $genderApiClient->getStats()]);
+    }
+
+    /**
+     * @Route("/copy-database", name="copyProductionDatabase")
+     */
+    public function copyProductionDatabase(): RedirectResponse
+    {
+        $devDB = $this->entityManager->getConnection()->getDatabase();
+        $prodDB = explode('_', $devDB)[0];
+        $user = $this->entityManager->getConnection()->getUsername();
+        $passwd = $this->entityManager->getConnection()->getPassword();
+
+        exec(
+            "mysql -u $user -p'$passwd' -e 'DROP DATABASE $devDB; CREATE DATABASE $devDB' &&
+            mysqldump --user='$user' --password='$passwd' $prodDB | mysql -u $user -p'$passwd' $devDB"
+        );
+
+        return $this->redirectToRoute('index');
     }
 
     private function autoPool(string $name)

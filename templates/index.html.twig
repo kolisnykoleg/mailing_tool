@@ -9,6 +9,9 @@
 
     <div class="container-fluid my-3">
         <nav>
+            {% if app.environment == 'dev' %}
+                <a href="/import/copy-database" class="btn btn-danger float-right">Get data from production env</a>
+            {% endif %}
             <div class="nav nav-tabs" id="navTab" role="tablist">
                 <a href="#navAddress" class="nav-link active" id="navAddressTab" data-toggle="tab"
                    role="tab">Addresses</a>
