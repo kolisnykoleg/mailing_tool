@@ -96,7 +96,7 @@ class CampaignController extends AbstractController
                         'title' => $address->getTitle(),
                         'firstname' => $address->getFirstName(),
                         'lastname' => $address->getLastName(),
-                        'street' => $address->getStreet() ? $address->getStreet() . '<br>' : '',
+                        'street' => $address->getStreet(),
                         'zip' => $address->getZip(),
                         'city' => $address->getCity(),
                         'var_1' => $address->getVar1(),

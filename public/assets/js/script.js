@@ -380,6 +380,10 @@ let mailingList = $('#mailingList').DataTable({
   },
   columns: [
     {
+      data: 'id',
+      visible: false,
+    },
+    {
       data: null,
       render: data => {
         return data && data.pool && data.pool.name
