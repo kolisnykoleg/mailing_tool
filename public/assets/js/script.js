@@ -81,9 +81,8 @@ $(document).on('click', '#clearSearch', function () {
 })
 
 $(document).on('submit', '#export', function () {
-  addressList.rows().data().toArray().forEach(data => {
-    $(this).append(`<input type="hidden" name="ids[]" value="${data.id}">`)
-  })
+  const ids = addressList.rows().data().toArray().map(data => data.id).join(',')
+  $(this).append(`<input type="hidden" name="ids" value="${ids}">`)
 })
 
 $('#reactionSelectSearch').on('change', function () {

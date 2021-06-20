@@ -200,7 +200,7 @@ class AddressController extends AbstractController
             'Var4',
             'Var5',
         ];
-        $ids = $request->get('ids');
+        $ids = explode(',', $request->get('ids'));
         $addresses = $this->addressRepository->findBy(['id' => $ids]);
 
         $spreadsheet = new Spreadsheet();
