@@ -34,20 +34,12 @@ let addressList = $('#addressList').DataTable({
       }
     },
   ],
-  buttons: [
-    {
-      extend: 'csvHtml5',
-      className: 'mb-2',
-      exportOptions: {
-        columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-      },
-    },
-  ],
   initComplete: function () {
     $('.col-md-6:eq(0)', $(this).DataTable().table().container())
       .append($('<button class="btn btn-primary mb-2 mr-2" data-toggle="modal" data-target="#createAddressFormModal">Add address</button>'))
       .append($('<button class="btn btn-primary mb-2 mr-2" id="searchBarToggle">Show filters</button>'))
       .append($('<button class="btn btn-primary mb-2 mr-2" id="clearSearch">Clear filters</button>'))
+      .append($('<form action="/address/export" method="post" class="d-inline" id="export"><button type="submit" class="btn btn-primary mb-2 mr-2">Export</button></form>'))
       .append($(this).DataTable().buttons().container())
   },
   createdRow: function (row, data) {
@@ -86,6 +78,12 @@ $(document).on('click', '#clearSearch', function () {
   $('#reactionSelectSearch').val('').trigger('change')
   $('#genderSelectSearch').val('').trigger('change')
   $('#statusSelectSearch').val('').trigger('change')
+})
+
+$(document).on('submit', '#export', function () {
+  addressList.rows().data().toArray().forEach(data => {
+    $(this).append(`<input type="hidden" name="ids[]" value="${data.id}">`)
+  })
 })
 
 $('#reactionSelectSearch').on('change', function () {

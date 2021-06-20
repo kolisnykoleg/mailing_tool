@@ -7,9 +7,12 @@ use App\Repository\AddressRepository;
 use App\Repository\PoolRepository;
 use App\Repository\ReactionRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -169,6 +172,62 @@ class AddressController extends AbstractController
         $this->entityManager->flush();
 
         return $this->json(['text' => 'Address added to blacklist']);
+    }
+
+    /**
+     * @Route("/export", name="exportAddresses")
+     */
+    public function export(Request $request): Response
+    {
+        $columns = [
+            'Company',
+            'Street',
+            'Zip',
+            'City',
+            'Country',
+            'Gender',
+            'FirstName',
+            'LastName',
+            'Phone',
+            'Email',
+            'Comment',
+            'Position',
+            'Title',
+            'FileUrl',
+            'Var1',
+            'Var2',
+            'Var3',
+            'Var4',
+            'Var5',
+        ];
+        $ids = $request->get('ids');
+        $addresses = $this->addressRepository->findBy(['id' => $ids]);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $data[] = $columns;
+        foreach ($addresses as $address) {
+            $row = [];
+            foreach ($columns as $column) {
+                $row[] = $address->{"get$column"}();
+            }
+            $data[] = $row;
+        }
+
+        $sheet->fromArray($data);
+        $writer = new Writer\Xlsx($spreadsheet);
+
+        $response = new StreamedResponse(
+            function () use ($writer) {
+                $writer->save('php://output');
+            }
+        );
+        ob_clean();
+        $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response->headers->set('Content-Disposition', 'attachment;filename="export.xlsx"');
+        $response->headers->set('Cache-Control', 'max-age=0');
+        return $response->send();
     }
 
     private function setData(Request $request, Address &$address)
