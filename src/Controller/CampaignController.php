@@ -104,7 +104,7 @@ class CampaignController extends AbstractController
                         'var_3' => $address->getVar3(),
                         'var_4' => $address->getVar4(),
                         'var_5' => $address->getVar5(),
-                        'company' => $this->formatCompany($address),
+                        'company' => $address->getCompany(),
                         'salutation' => $this->getSalutation($address),
                         'gendertext' => $this->getGenderText($address),
                         'addressgender' => $this->getAddressGender($address),
