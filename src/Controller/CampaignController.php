@@ -110,6 +110,7 @@ class CampaignController extends AbstractController
                         'addressgender' => $this->getAddressGender($address),
                         'addresslastname' => $this->getAddressSalutation($address),
                         'addresssalutation' => $this->getAddressSalutationFull($address),
+                        'addresssalutationlastname' => $this->getAddressSalutationFullLastname($address),
                     ],
                 ]
             );
@@ -197,6 +198,17 @@ class CampaignController extends AbstractController
             ' ',
             array_filter(
                 ['z. Hd.', $gender, $address->getTitle(), $address->getFirstName(), $address->getLastName()]
+            )
+        );
+    }
+
+    private function getAddressSalutationFullLastname(Address $address): string
+    {
+        $gender = $this->getAddressGender($address);
+        return join(
+            ' ',
+            array_filter(
+                ['z. Hd.', $gender, $address->getTitle(), $address->getLastName()]
             )
         );
     }
