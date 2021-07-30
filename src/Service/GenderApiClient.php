@@ -52,8 +52,12 @@ class GenderApiClient
         return $data;
     }
 
-    public function getGender(string $firstName): string
+    public function getGender(?string $firstName): ?string
     {
+        if (!$firstName) {
+            return null;
+        }
+
         $name = strtolower($firstName);
 
         $nameGender = $this->nameGenderRepository->findOneBy(
