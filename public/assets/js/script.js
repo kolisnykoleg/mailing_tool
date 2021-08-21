@@ -1,3 +1,6 @@
+$.fn.dataTable.ext.errMode = 'none'
+console.log('OK')
+
 let addressList = $('#addressList').DataTable({
   ajax: {
     url: '/address/list',

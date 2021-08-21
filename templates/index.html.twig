@@ -9,17 +9,21 @@
 
     <div class="container-fluid my-3">
         <nav>
-            {% if app.environment == 'dev' %}
+            {% if app.environment == 'dev' and is_granted('ROLE_ADMIN') %}
                 <a href="/import/copy-database" class="btn btn-danger float-right">Get data from production env</a>
             {% endif %}
             <div class="nav nav-tabs" id="navTab" role="tablist">
                 <a href="#navAddress" class="nav-link active" id="navAddressTab" data-toggle="tab"
                    role="tab">Addresses</a>
-                <a href="#navPool" class="nav-link" id="navPoolTab" data-toggle="tab" role="tab">Pools</a>
-                <a href="#navImport" class="nav-link" id="navImportTab" data-toggle="tab" role="tab">Import</a>
-                <a href="#navTemplates" class="nav-link" id="navTemplatesTab" data-toggle="tab" role="tab">Templates</a>
-                <a href="#navMailings" class="nav-link" id="navMailingsTab" data-toggle="tab" role="tab">Mailings</a>
-                <a href="#navActions" class="nav-link" id="navActionsTab" data-toggle="tab" role="tab">Actions</a>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="#navPool" class="nav-link" id="navPoolTab" data-toggle="tab" role="tab">Pools</a>
+                    <a href="#navImport" class="nav-link" id="navImportTab" data-toggle="tab" role="tab">Import</a>
+                    <a href="#navTemplates" class="nav-link" id="navTemplatesTab" data-toggle="tab"
+                       role="tab">Templates</a>
+                    <a href="#navMailings" class="nav-link" id="navMailingsTab" data-toggle="tab"
+                       role="tab">Mailings</a>
+                    <a href="#navActions" class="nav-link" id="navActionsTab" data-toggle="tab" role="tab">Actions</a>
+                {% endif %}
                 <a href="#navBlacklist" class="nav-link" id="navBlacklistTab" data-toggle="tab" role="tab">Blacklist</a>
             </div>
         </nav>
@@ -507,6 +511,7 @@
                                     <input type="text" name="var_5" class="form-control" id="var_5">
                                 </div>
                             </div>
+                            {% if is_granted('ROLE_ADMIN') %}
                             <p class="mb-2">Mailing</p>
                             <div class="form-row">
                                 <div class="form-group col">
@@ -534,11 +539,14 @@
                                     </thead>
                                 </table>
                             </div>
+                            {% endif %}
                         </div>
                         <div class="modal-footer d-flex justify-content-between">
                             <button id="blacklistBtn" class="btn btn-danger">Add to blacklist</button>
+                            {% if is_granted('ROLE_ADMIN') %}
                             <button id="deleteAddress" class="btn btn-danger"><i class="fa fa-trash"></i></button>
                             <button type="submit" class="btn btn-primary">Save</button>
+                            {% endif %}
                         </div>
                         <input type="text" name="id" id="address_id" class="d-none">
                     </form>

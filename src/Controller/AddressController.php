@@ -9,6 +9,7 @@ use App\Repository\ReactionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,6 +18,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * @Route("/address")
+ * @IsGranted("ROLE_USER")
  */
 class AddressController extends AbstractController
 {
@@ -54,6 +56,7 @@ class AddressController extends AbstractController
 
     /**
      * @Route("/create", name="createAddress")
+     * @IsGranted("ROLE_ADMIN")
      */
     public function create(Request $request): Response
     {
@@ -143,6 +146,7 @@ class AddressController extends AbstractController
 
     /**
      * @Route("/update/{id}", name="updateAddress")
+     * @IsGranted("ROLE_ADMIN")
      */
     public function update(Request $request, Address $address): Response
     {
@@ -154,6 +158,7 @@ class AddressController extends AbstractController
 
     /**
      * @Route("/delete/{id}", name="deleteAddress")
+     * @IsGranted("ROLE_ADMIN")
      */
     public function delete(Address $address): Response
     {
@@ -176,6 +181,7 @@ class AddressController extends AbstractController
 
     /**
      * @Route("/export", name="exportAddresses")
+     * @IsGranted("ROLE_ADMIN")
      */
     public function export(Request $request): Response
     {

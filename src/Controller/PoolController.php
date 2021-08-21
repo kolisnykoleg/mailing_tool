@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Pool;
 use App\Repository\PoolRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,6 +14,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @Route("/pool")
+ * @IsGranted("ROLE_USER")
  */
 class PoolController extends AbstractController
 {
@@ -43,6 +45,7 @@ class PoolController extends AbstractController
 
     /**
      * @Route("/create", name="createPool")
+     * @IsGranted("ROLE_ADMIN")
      */
     public function create(Request $request): Response
     {
@@ -93,6 +96,7 @@ class PoolController extends AbstractController
 
     /**
      * @Route("/update/{id}", name="updatePool")
+     * @IsGranted("ROLE_ADMIN")
      */
     public function update(Request $request, Pool $pool): Response
     {
